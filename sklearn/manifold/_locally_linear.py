@@ -587,6 +587,14 @@ class LocallyLinearEmbedding(TransformerMixin,
         algorithm to use for nearest neighbors search,
         passed to neighbors.NearestNeighbors instance
 
+    neighbors_metric : string, or callable, default="minkowski"
+        The metric to use when calculating distance between instances in a
+        feature array. If metric is a string or callable, it must be one of
+        the options allowed by :func:`sklearn.metrics.pairwise_distances` for
+        its metric parameter.
+        If metric is "precomputed", X is assumed to be a distance matrix and
+        must be square. X may be a :term:`Glossary <sparse graph>`.
+
     random_state : int, RandomState instance, default=None
         Determines the random number generator when
         ``eigen_solver`` == 'arpack'. Pass an int for reproducible results
@@ -641,7 +649,7 @@ class LocallyLinearEmbedding(TransformerMixin,
     def __init__(self, *, n_neighbors=5, n_components=2, reg=1E-3,
                  eigen_solver='auto', tol=1E-6, max_iter=100,
                  method='standard', hessian_tol=1E-4, modified_tol=1E-12,
-                 neighbors_algorithm='auto', random_state=None, n_jobs=None):
+                 neighbors_algorithm='auto', neighbors_metric='minkowski', random_state=None, n_jobs=None):
         self.n_neighbors = n_neighbors
         self.n_components = n_components
         self.reg = reg
@@ -653,11 +661,14 @@ class LocallyLinearEmbedding(TransformerMixin,
         self.modified_tol = modified_tol
         self.random_state = random_state
         self.neighbors_algorithm = neighbors_algorithm
+        self.neighbors_metric = neighbors_metric
         self.n_jobs = n_jobs
 
     def _fit_transform(self, X):
+
         self.nbrs_ = NearestNeighbors(n_neighbors=self.n_neighbors,
                                       algorithm=self.neighbors_algorithm,
+                                      metric=self.neighbors_metric,
                                       n_jobs=self.n_jobs)
 
         random_state = check_random_state(self.random_state)
